@@ -1,0 +1,20 @@
+{
+  "root": true,
+  "env": {
+    "node": true,
+    "es2022": true
+  },
+  "extends": ["airbnb-base"],
+  "parserOptions": {
+    "ecmaVersion": 2022
+  },
+  "rules": {
+    "semi": ["error", "never"],
+    "comma-dangle": "off",
+    "camelcase": "off",
+    "no-console": "off",
+    "max-len": ["warn", { "code": 140, "ignoreStrings": true, "ignoreTemplateLiterals": true }],
+    "global-require": "off",
+    "import/no-dynamic-require": "off"
+  }
+}

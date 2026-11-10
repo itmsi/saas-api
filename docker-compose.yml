@@ -1,0 +1,81 @@
+# Dua proses dari image yang sama: saas-api (HTTP) & saas-worker (provisioning).
+# Infra lokal opsional: docker compose --profile local-infra up -d
+x-app: &app
+  image: logistics-saas-api:latest
+  env_file: .env
+  environment:
+    NODE_ENV: production
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
+  restart: unless-stopped
+  networks:
+    - infra_net
+
+services:
+  saas-api:
+    <<: *app
+    container_name: saas-api
+    build: .
+    command: ["node", "src/api.js"]
+    ports:
+      - "127.0.0.1:9061:9061" # di belakang Kong
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:9061/health > /dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits: { memory: 512M, cpus: "0.5" }
+
+  saas-worker:
+    <<: *app
+    container_name: saas-worker
+    command: ["node", "src/worker.js"]
+    # beri waktu job berjalan selesai saat deploy (WORKER_SHUTDOWN_TIMEOUT_MS)
+    stop_grace_period: 11m
+    volumes:
+      - ./backups:/backups
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3100/health > /dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits: { memory: 512M, cpus: "0.5" }
+
+  postgres:
+    profiles: ["local-infra"]
+    container_name: saas-postgres
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-saas_core}
+      TZ: Asia/Jakarta
+    ports: ["127.0.0.1:5432:5432"]
+    volumes: [saas-pg-data:/var/lib/postgresql/data]
+    networks: [infra_net]
+
+  rabbitmq:
+    profiles: ["local-infra"]
+    container_name: saas-rabbitmq
+    image: rabbitmq:3.13-management-alpine
+    ports: ["127.0.0.1:5672:5672", "127.0.0.1:15672:15672"]
+    networks: [infra_net]
+
+  redis:
+    profiles: ["local-infra"]
+    container_name: saas-redis
+    image: redis:7-alpine
+    ports: ["127.0.0.1:6379:6379"]
+    networks: [infra_net]
+
+volumes:
+  saas-pg-data:
+
+networks:
+  infra_net:
+    external: true # buat sekali: docker network create infra_net
+    name: infra_net
