@@ -113,17 +113,20 @@ const clientSchemas = {
   },
   ClientCreateRequest: {
     type: 'object',
-    required: ['client_code', 'name', 'plan_code'],
+    required: ['client_code', 'name'],
     properties: {
       client_code: {
         type: 'string', pattern: '^[a-z0-9-]{3,30}$', description: 'Unik. Menjadi nama DB lg_{code} dan role lg_{code}_owner / lg_{code}_app (tanda - menjadi _)', example: 'ogo',
       },
       ...profile,
-      plan_code: { type: 'string', example: 'pro' },
+      plan_code: {
+        type: 'string', nullable: true, description: 'Kosong / null = plan default (is_default)', example: 'pro',
+      },
       subscription: {
         type: 'object',
+        description: 'Opsional. Jika kosong: plan default → active tanpa end_date (tanpa batas waktu); plan lain → trial.',
         properties: {
-          status: { type: 'string', enum: ['trial', 'active'], default: 'trial' },
+          status: { type: 'string', enum: ['trial', 'active'] },
           start_date: {
             type: 'string', format: 'date', description: 'Default hari ini', example: '2026-11-10'
           },
@@ -136,7 +139,7 @@ const clientSchemas = {
         },
       },
       cluster_id: {
-        type: 'string', format: 'uuid', nullable: true, description: 'null = pilih otomatis cluster aktif dengan tenant paling sedikit'
+        type: 'string', format: 'uuid', nullable: true, description: 'Kosong / null = cluster default (is_default). Jika default penuh / tidak aktif, dipilih cluster aktif dengan tenant paling sedikit'
       },
       pool_max: {
         type: 'integer', minimum: 1, maximum: 100, description: 'Maks koneksi pool di logistics-api', example: 5

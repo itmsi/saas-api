@@ -22,6 +22,11 @@ const assertNameFree = async (name, exceptId) => {
   if (await q.first('id')) throw new AppError('CLUSTER_NAME_TAKEN')
 }
 
+/** Hanya satu cluster default: lepas default lama sebelum menyimpan yang baru */
+const clearDefault = (trx, body, exceptId) => (body.is_default
+  ? alive(trx('db_clusters')).where({ is_default: true }).whereNot({ id: exceptId || null }).update({ is_default: false })
+  : null)
+
 const list = async ({ status }) => {
   const q = alive(db('db_clusters')).orderBy('name')
   if (status) q.where({ status })
@@ -32,7 +37,10 @@ const detail = async (id) => withCapacity(await findOr404(id))
 
 const create = async (body, ctx) => {
   await assertNameFree(body.name)
-  const [row] = await db('db_clusters').insert(stamp.create(body, ctx.actorId)).returning('*')
+  const [row] = await db.transaction(async (trx) => {
+    await clearDefault(trx, body)
+    return trx('db_clusters').insert(stamp.create(body, ctx.actorId)).returning('*')
+  })
   await audit.fromRequest(ctx, 'cluster.create', { type: 'cluster', id: row.id }, { after: row })
   return withCapacity(row)
 }
@@ -40,7 +48,10 @@ const create = async (body, ctx) => {
 const update = async (id, body, ctx) => {
   const before = await findOr404(id)
   if (body.name) await assertNameFree(body.name, id)
-  const [row] = await db('db_clusters').where({ id }).update(stamp.update(body, ctx.actorId)).returning('*')
+  const [row] = await db.transaction(async (trx) => {
+    await clearDefault(trx, body, id)
+    return trx('db_clusters').where({ id }).update(stamp.update(body, ctx.actorId)).returning('*')
+  })
   await audit.fromRequest(ctx, 'cluster.update', { type: 'cluster', id }, { before, after: row })
   return withCapacity(row)
 }

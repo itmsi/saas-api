@@ -7,6 +7,8 @@ const fields = {
   features: Joi.object().unknown(true),
   price_monthly: Joi.number().min(0).precision(2),
   is_active: Joi.boolean(),
+  // true = jadi plan default POST /clients (default lama otomatis dilepas)
+  is_default: Joi.boolean(),
 }
 
 const list = Joi.object({ is_active: Joi.boolean() })

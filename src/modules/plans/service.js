@@ -19,6 +19,11 @@ const clientsOnPlan = (planId) => alive(db('subscriptions as s'), 's')
   .whereIn('s.status', CURRENT_SUBSCRIPTION)
   .select('c.id as client_id', 'c.client_code')
 
+/** Hanya satu plan default: lepas default lama sebelum menyimpan yang baru */
+const clearDefault = (trx, body, exceptId) => (body.is_default
+  ? alive(trx('plans')).where({ is_default: true }).whereNot({ id: exceptId || null }).update({ is_default: false })
+  : null)
+
 const toRow = (body) => (body.features ? { ...body, features: JSON.stringify(body.features) } : { ...body })
 
 const list = async ({ is_active: isActive }) => {
@@ -31,7 +36,10 @@ const detail = async (id) => publicRow(await findOr404(id))
 
 const create = async (body, ctx) => {
   if (await alive(db('plans')).where({ code: body.code }).first('id')) throw new AppError('PLAN_CODE_TAKEN')
-  const [row] = await db('plans').insert(stamp.create(toRow(body), ctx.actorId)).returning('*')
+  const [row] = await db.transaction(async (trx) => {
+    await clearDefault(trx, body)
+    return trx('plans').insert(stamp.create(toRow(body), ctx.actorId)).returning('*')
+  })
   await audit.fromRequest(ctx, 'plan.create', { type: 'plan', id: row.id }, { after: row })
   return publicRow(row)
 }
@@ -39,7 +47,10 @@ const create = async (body, ctx) => {
 /** Feature flag / limit berubah -> invalidasi cache semua tenant di plan ini */
 const update = async (id, body, ctx) => {
   const before = await findOr404(id)
-  const [row] = await db('plans').where({ id }).update(stamp.update(toRow(body), ctx.actorId)).returning('*')
+  const [row] = await db.transaction(async (trx) => {
+    await clearDefault(trx, body, id)
+    return trx('plans').where({ id }).update(stamp.update(toRow(body), ctx.actorId)).returning('*')
+  })
 
   const clients = await clientsOnPlan(id)
   await Promise.all(clients.map((c) => cache.invalidateTenant(c, 'plan_updated')))

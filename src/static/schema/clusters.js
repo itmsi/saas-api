@@ -17,6 +17,9 @@ const clusterFields = {
   },
   max_tenants: { type: 'integer', default: 100, example: 100 },
   status,
+  is_default: {
+    type: 'boolean', example: false, description: 'Cluster default POST /clients saat cluster_id kosong. Hanya satu; set true akan melepas default lama.',
+  },
 }
 
 const clusterSchemas = {

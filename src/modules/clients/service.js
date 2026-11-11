@@ -37,20 +37,41 @@ const currentSubscription = (clientId, trx = db) => alive(trx('subscriptions as 
   .whereIn('s.status', CURRENT_SUBSCRIPTION)
   .first('s.id', 's.status', 's.start_date', 's.end_date', 's.trial_end_date', 's.auto_renew', 'p.id as plan_id', 'p.code as plan_code', 'p.name as plan_name')
 
-/** Pilih cluster: yang diminta, atau cluster aktif dengan tenant paling sedikit. Dikunci FOR UPDATE. */
+/**
+ * Pilih cluster (dikunci FOR UPDATE):
+ *  1. cluster_id yang diminta, atau
+ *  2. cluster default (is_default) jika active & belum penuh, atau
+ *  3. cluster active dengan tenant paling sedikit.
+ */
 const pickCluster = async (trx, clusterId) => {
-  const q = alive(trx('db_clusters'))
+  const available = () => alive(trx('db_clusters'))
     .where({ status: 'active' })
     .whereRaw('tenant_count < max_tenants')
     .forUpdate()
   if (clusterId) {
-    const row = await q.where({ id: clusterId }).first()
+    const row = await available().where({ id: clusterId }).first()
     if (!row) throw new AppError('CLUSTER_NOT_AVAILABLE', { details: { cluster_id: clusterId } })
     return row
   }
-  const row = await q.orderBy('tenant_count').orderBy('created_at').first()
+  const row = await available().where({ is_default: true }).first()
+    || await available().orderBy('tenant_count').orderBy('created_at').first()
   if (!row) throw new AppError('NO_CLUSTER_AVAILABLE')
   return row
+}
+
+/** Pilih plan: plan_code yang diminta, atau plan default (is_default). */
+const pickPlan = async (trx, planCode) => {
+  const q = alive(trx('plans')).where({ is_active: true })
+  const plan = await (planCode ? q.where({ code: planCode }) : q.where({ is_default: true })).first()
+  if (!plan) {
+    throw new AppError('VALIDATION_ERROR', {
+      details: [{
+        field: 'plan_code',
+        message: planCode ? 'Plan tidak ditemukan / tidak aktif' : 'plan_code wajib diisi (tidak ada plan default yang aktif)',
+      }],
+    })
+  }
+  return plan
 }
 
 const list = async (query) => {
@@ -100,8 +121,7 @@ const create = async (body, ctx) => {
     if (await alive(trx('clients')).where({ client_code: body.client_code }).first('id')) {
       throw new AppError('CLIENT_CODE_TAKEN')
     }
-    const plan = await alive(trx('plans')).where({ code: body.plan_code, is_active: true }).first()
-    if (!plan) throw new AppError('VALIDATION_ERROR', { details: [{ field: 'plan_code', message: 'Plan tidak ditemukan / tidak aktif' }] })
+    const plan = await pickPlan(trx, body.plan_code)
 
     const names = dbNamesFor(body.client_code)
     const nameTaken = await alive(trx('tenant_db_configs')).where({ db_name: names.db_name }).first('id')
@@ -121,11 +141,13 @@ const create = async (body, ctx) => {
       settings: JSON.stringify(body.settings || {}),
     }, actor)).returning(CLIENT_COLUMNS)
 
+    // Plan default tanpa input subscription = active tanpa batas waktu
     const sub = body.subscription || {}
+    const permanent = plan.is_default && !sub.status
     const [subscription] = await trx('subscriptions').insert(stamp.create({
       client_id: client.id,
       plan_id: plan.id,
-      status: sub.status || 'trial',
+      status: sub.status || (permanent ? 'active' : 'trial'),
       start_date: sub.start_date || new Date(),
       end_date: sub.end_date || null,
       trial_end_date: sub.trial_end_date || null,

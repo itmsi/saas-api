@@ -20,6 +20,9 @@ const planFields = {
   },
   price_monthly: { type: 'number', format: 'double', example: 1500000 },
   is_active: { type: 'boolean', example: true },
+  is_default: {
+    type: 'boolean', example: false, description: 'Plan default POST /clients saat plan_code kosong. Hanya satu; set true akan melepas default lama.',
+  },
 }
 
 const planSchemas = {

@@ -49,18 +49,35 @@ const clientPaths = {
       description: '**Role:** superadmin, operator.\n\n'
         + 'Dalam **satu transaksi**: insert `clients` (status provisioning), `subscriptions`, `tenant_db_configs` (password random terenkripsi), '
         + '`provisioning_jobs` + 7 `provisioning_steps`, dan `outbox_events`. Lalu `db_clusters.tenant_count + 1`.\n\n'
+        + '`plan_code` kosong → plan default; `cluster_id` kosong → cluster default (jika penuh / tidak aktif → cluster aktif dengan tenant paling sedikit). '
+        + 'Plan default tanpa `subscription` → subscription `active` tanpa `end_date`.\n\n'
         + 'Response **202** + `job_id`. Pantau dengan `GET /provisioning-jobs/{job_id}`.',
       security: bearer,
-      requestBody: jsonBody('ClientCreateRequest', {
-        client_code: 'ogo',
-        name: 'OGO Logistics',
-        legal_name: 'PT Owngo Logistics Indonesia',
-        email: 'admin@ogo.co.id',
-        phone: '0812xxxx',
-        plan_code: 'pro',
-        subscription: { status: 'trial', start_date: '2026-11-10', trial_end_date: '2026-12-10' },
-        cluster_id: null,
-        settings: { timezone: 'Asia/Jakarta' },
+      requestBody: jsonBody('ClientCreateRequest', undefined, {
+        examples: {
+          default: {
+            summary: 'Plan & cluster default (subscription active tanpa batas waktu)',
+            value: {
+              client_code: 'ogo',
+              name: 'OGO Logistics',
+              email: 'admin@ogo.co.id',
+            },
+          },
+          custom: {
+            summary: 'Pilih plan & cluster sendiri',
+            value: {
+              client_code: 'ogo',
+              name: 'OGO Logistics',
+              legal_name: 'PT Owngo Logistics Indonesia',
+              email: 'admin@ogo.co.id',
+              phone: '0812xxxx',
+              plan_code: 'pro',
+              subscription: { status: 'trial', start_date: '2026-11-10', trial_end_date: '2026-12-10' },
+              cluster_id: '9f8e7d6c-5b4a-4321-8fed-cba987654321',
+              settings: { timezone: 'Asia/Jakarta' },
+            },
+          },
+        },
       }),
       responses: {
         202: dataResponse('Client dibuat, provisioning dijadwalkan', ref('ClientCreateResponse')),

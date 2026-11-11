@@ -34,15 +34,18 @@ const create = Joi.object({
     .messages({ 'string.pattern.base': 'client_code hanya huruf kecil, angka, dan tanda -, 3-30 karakter' }),
   ...profile,
   name: profile.name.required(),
-  plan_code: Joi.string().max(50).required(),
+  // kosong = plan default (is_default)
+  plan_code: Joi.string().max(50).allow(null),
+  // kosong + plan default = active tanpa end_date; kosong + plan lain = trial
   subscription: Joi.object({
-    status: Joi.string().valid('trial', 'active').default('trial'),
+    status: Joi.string().valid('trial', 'active'),
     start_date: Joi.date().iso(),
     end_date: Joi.date().iso().allow(null),
     trial_end_date: Joi.date().iso().allow(null),
     auto_renew: Joi.boolean(),
     notes: Joi.string().max(2000).allow(null, ''),
   }).default({}),
+  // kosong = cluster default, jika tidak tersedia -> cluster active dengan tenant paling sedikit
   cluster_id: uuid.allow(null),
   pool_max: Joi.number().integer().min(1).max(100),
 })

@@ -13,6 +13,8 @@ const fields = {
     .messages({ 'string.pattern.base': 'admin_secret_ref harus huruf besar/angka/underscore, mis. CLUSTER_PG_PROD_01' }),
   max_tenants: Joi.number().integer().min(1),
   status: Joi.string().valid(...STATUSES),
+  // true = jadi cluster default POST /clients (default lama otomatis dilepas)
+  is_default: Joi.boolean(),
 }
 
 const list = Joi.object({ status: Joi.string().valid(...STATUSES) })
