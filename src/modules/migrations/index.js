@@ -21,11 +21,11 @@ router.get('/status', controller.status)
 router.post('/rollout', canWrite, validate({ body: schema.rollout }), controller.rollout)
 
 /**
- * @route   GET /api/v1/migrations/rollouts
+ * @route   POST /api/v1/migrations/rollouts
  * @desc    List rollout
  * @access  Admin
  */
-router.get('/rollouts', validate({ query: schema.list }), controller.listRollouts)
+router.post('/rollouts', validate({ body: schema.list }), controller.listRollouts)
 
 /**
  * @route   GET /api/v1/migrations/rollouts/:id

@@ -2,26 +2,26 @@
  * Swagger API Path Definitions for DB Clusters Module
  */
 const {
-  ref, response, param, dataResponse, jsonBody, errorBody, bearer,
+  ref, response, param, dataResponse, jsonBody, listBody, errorBody, bearer,
 } = require('../helpers')
 
 const tags = ['Clusters']
 
 const clusterPaths = {
-  '/clusters': {
-    get: {
+  '/clusters/list': {
+    post: {
       tags,
       summary: 'List cluster + kapasitas',
       description: '**Role:** semua admin',
       security: bearer,
-      parameters: [{
-        name: 'status', in: 'query', required: false, schema: { type: 'string', enum: ['active', 'full', 'maintenance', 'disabled'] },
-      }],
+      requestBody: listBody({ status: { type: 'string', enum: ['active', 'full', 'maintenance', 'disabled'] } }, { example: { status: 'active' } }),
       responses: {
         200: dataResponse('OK', { type: 'array', items: ref('Cluster') }),
         401: response('Unauthorized'),
       },
     },
+  },
+  '/clusters': {
     post: {
       tags,
       summary: 'Daftarkan cluster',

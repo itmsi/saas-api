@@ -7,7 +7,7 @@ const status = async (req, res) => ok(res, await service.status())
 const rollout = async (req, res) => accepted(res, await service.rollout(req.body, ctxOf(req)))
 
 const listRollouts = async (req, res) => {
-  const { rows, meta } = await service.listRollouts(req.valid.query)
+  const { rows, meta } = await service.listRollouts(req.body)
   return ok(res, rows, { meta })
 }
 

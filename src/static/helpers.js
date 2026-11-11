@@ -40,6 +40,34 @@ const jsonBody = (schemaName, example, { required = true, examples } = {}) => ({
   },
 })
 
+/**
+ * Request body filter untuk endpoint list (POST). Field sama dengan query lama.
+ * @param {object} properties  properti filter, mis. { status: { type: 'string' } }
+ * @param {{ paginated?: boolean, example?: object }} [opts]
+ */
+const listBody = (properties = {}, { paginated = false, example } = {}) => ({
+  required: false,
+  content: {
+    'application/json': {
+      schema: {
+        type: 'object',
+        properties: {
+          ...(paginated ? {
+            page: {
+              type: 'integer', minimum: 1, default: 1, description: 'Nomor halaman',
+            },
+            limit: {
+              type: 'integer', minimum: 1, maximum: 100, default: 20, description: 'Jumlah data per halaman (maks 100)',
+            },
+          } : {}),
+          ...properties,
+        },
+      },
+      example: example || (paginated ? { page: 1, limit: 20 } : {}),
+    },
+  },
+})
+
 const errorBody = (description, code, message, httpStatus, details) => ({
   description,
   content: {
@@ -60,5 +88,5 @@ const bearer = [{ bearerAuth: [] }]
 const internalKey = [{ InternalKeyAuth: [] }]
 
 module.exports = {
-  ref, response, param, dataResponse, jsonBody, errorBody, bearer, internalKey,
+  ref, response, param, dataResponse, jsonBody, listBody, errorBody, bearer, internalKey,
 }

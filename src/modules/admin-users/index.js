@@ -8,11 +8,11 @@ const controller = require('./controller')
 router.use(authenticate, superadminOnly)
 
 /**
- * @route   GET /api/v1/admin-users
+ * @route   POST /api/v1/admin-users/list
  * @desc    List admin MSI (search, role, is_active, pagination)
  * @access  superadmin
  */
-router.get('/', validate({ query: schema.list }), controller.list)
+router.post('/list', validate({ body: schema.list }), controller.list)
 
 /**
  * @route   POST /api/v1/admin-users

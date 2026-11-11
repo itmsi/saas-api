@@ -3,7 +3,7 @@ const { ctxOf } = require('../../utils/context')
 const service = require('./service')
 
 const list = async (req, res) => {
-  const { rows, meta } = await service.list(req.valid.query)
+  const { rows, meta } = await service.list(req.body)
   return ok(res, rows, { meta })
 }
 

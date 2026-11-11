@@ -3,7 +3,7 @@ const { ctxOf } = require('../../utils/context')
 const service = require('./service')
 
 const list = async (req, res) => {
-  const { rows, meta } = await service.list(req.valid.query)
+  const { rows, meta } = await service.list(req.body)
   return ok(res, rows, { meta })
 }
 
@@ -29,12 +29,12 @@ const revealSystemUser = async (req, res) => {
 const resetSystemUser = async (req, res) => accepted(res, await service.resetSystemUser(req.valid.params.id, ctxOf(req)))
 
 const jobs = async (req, res) => {
-  const { rows, meta } = await service.jobs(req.valid.params.id, req.valid.query)
+  const { rows, meta } = await service.jobs(req.valid.params.id, req.body)
   return ok(res, rows, { meta })
 }
 
 const auditLogs = async (req, res) => {
-  const { rows, meta } = await service.auditLogs(req.valid.params.id, req.valid.query)
+  const { rows, meta } = await service.auditLogs(req.valid.params.id, req.body)
   return ok(res, rows, { meta })
 }
 

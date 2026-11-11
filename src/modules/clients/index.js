@@ -8,11 +8,11 @@ const subscriptions = require('../subscriptions')
 router.use(authenticate)
 
 /**
- * @route   GET /api/v1/clients
+ * @route   POST /api/v1/clients/list
  * @desc    List client (filter status, search, cluster, plan, pagination)
  * @access  Admin
  */
-router.get('/', validate({ query: schema.list }), controller.list)
+router.post('/list', validate({ body: schema.list }), controller.list)
 
 /**
  * @route   POST /api/v1/clients
@@ -78,18 +78,18 @@ router.post('/:id/reveal-system-user', superadminOnly, validate({ params: schema
 router.post('/:id/reset-system-user', canWrite, validate({ params: schema.idParam }), controller.resetSystemUser)
 
 /**
- * @route   GET /api/v1/clients/:id/jobs
+ * @route   POST /api/v1/clients/:id/jobs
  * @desc    Histori job provisioning client
  * @access  Admin
  */
-router.get('/:id/jobs', validate({ params: schema.idParam, query: schema.jobs }), controller.jobs)
+router.post('/:id/jobs', validate({ params: schema.idParam, body: schema.jobs }), controller.jobs)
 
 /**
- * @route   GET /api/v1/clients/:id/audit-logs
+ * @route   POST /api/v1/clients/:id/audit-logs
  * @desc    Histori aktivitas admin terhadap client
  * @access  Admin
  */
-router.get('/:id/audit-logs', validate({ params: schema.idParam, query: schema.auditLogs }), controller.auditLogs)
+router.post('/:id/audit-logs', validate({ params: schema.idParam, body: schema.auditLogs }), controller.auditLogs)
 
 // /api/v1/clients/:id/subscriptions -> modul subscriptions
 router.use('/:id/subscriptions', subscriptions.clientRouter)

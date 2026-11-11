@@ -3,39 +3,37 @@
  */
 const {
   ref, response, param, dataResponse, errorBody, bearer,
+  listBody,
 } = require('../helpers')
 
 const tags = ['Provisioning Jobs']
 const notRetryable = errorBody('Job tidak bisa diulang', 'JOB_NOT_RETRYABLE', 'Job ini tidak bisa diulang pada status saat ini.', 409, { status: 'success' })
 
 const provisioningPaths = {
-  '/provisioning-jobs': {
-    get: {
+  '/provisioning-jobs/list': {
+    post: {
       tags,
       summary: 'List job',
       description: '**Role:** semua admin',
       security: bearer,
-      parameters: [
-        param('PageParam'),
-        param('LimitParam'),
-        {
-          name: 'status', in: 'query', required: false, schema: { type: 'string', enum: ['queued', 'running', 'success', 'failed', 'rolling_back', 'rolled_back', 'rollback_failed'] },
-        },
-        {
-          name: 'type', in: 'query', required: false, schema: { type: 'string', enum: ['provision', 'migrate', 'cleanup', 'deprovision', 'rotate_password', 'reset_system_user'] },
-        },
-        {
-          name: 'client_id', in: 'query', required: false, schema: { type: 'string', format: 'uuid' },
-        },
-        {
-          name: 'rollout_id', in: 'query', required: false, schema: { type: 'string', format: 'uuid' },
-        },
-      ],
+      requestBody: listBody({
+        status: { type: 'string', enum: ['queued', 'running', 'success', 'failed', 'rolling_back', 'rolled_back', 'rollback_failed'] },
+        type: { type: 'string', enum: ['provision', 'migrate', 'cleanup', 'deprovision', 'rotate_password', 'reset_system_user'] },
+        client_id: { type: 'string', format: 'uuid' },
+        rollout_id: { type: 'string', format: 'uuid' },
+      }, {
+        paginated: true,
+        example: {
+          page: 1, limit: 20, status: 'failed', type: 'provision'
+        }
+      }),
       responses: {
         200: dataResponse('OK', { type: 'array', items: ref('ProvisioningJob') }, { paginated: true }),
         401: response('Unauthorized'),
       },
     },
+  },
+  '/provisioning-jobs': {
   },
   '/provisioning-jobs/{id}': {
     get: {

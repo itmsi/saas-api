@@ -7,11 +7,11 @@ const controller = require('./controller')
 router.use(authenticate)
 
 /**
- * @route   GET /api/v1/clusters
+ * @route   POST /api/v1/clusters/list
  * @desc    List cluster + kapasitas
  * @access  Admin
  */
-router.get('/', validate({ query: schema.list }), controller.list)
+router.post('/list', validate({ body: schema.list }), controller.list)
 
 /**
  * @route   GET /api/v1/clusters/:id

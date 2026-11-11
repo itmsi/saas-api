@@ -117,18 +117,6 @@ const commonParameters = {
   IdParam: {
     name: 'id', in: 'path', required: true, description: 'ID (UUID)', schema: { type: 'string', format: 'uuid' },
   },
-  PageParam: {
-    name: 'page', in: 'query', required: false, description: 'Nomor halaman', schema: { type: 'integer', minimum: 1, default: 1 },
-  },
-  LimitParam: {
-    name: 'limit',
-    in: 'query',
-    required: false,
-    description: 'Jumlah data per halaman (maks 100)',
-    schema: {
-      type: 'integer', minimum: 1, maximum: 100, default: 20
-    },
-  },
   AcceptLanguage: {
     name: 'Accept-Language', in: 'header', required: false, description: 'Bahasa pesan error', schema: { type: 'string', enum: ['id', 'en'], default: 'id' },
   },

@@ -2,37 +2,36 @@
  * Swagger API Path Definitions for Admin Users Module (khusus superadmin)
  */
 const {
-  ref, response, param, dataResponse, jsonBody, errorBody, bearer,
+  ref, response, param, dataResponse, jsonBody, listBody, errorBody, bearer,
 } = require('../helpers')
 
 const tags = ['Admin Users']
 
 const adminUserPaths = {
-  '/admin-users': {
-    get: {
+  '/admin-users/list': {
+    post: {
       tags,
       summary: 'List admin MSI',
       description: '**Role:** superadmin',
       security: bearer,
-      parameters: [
-        param('PageParam'),
-        param('LimitParam'),
-        {
-          name: 'search', in: 'query', required: false, description: 'Cari di email / nama', schema: { type: 'string' },
-        },
-        {
-          name: 'role', in: 'query', required: false, schema: { type: 'string', enum: ['superadmin', 'operator', 'viewer'] },
-        },
-        {
-          name: 'is_active', in: 'query', required: false, schema: { type: 'boolean' },
-        },
-      ],
+      requestBody: listBody({
+        search: { type: 'string', description: 'Cari di email / nama' },
+        role: { type: 'string', enum: ['superadmin', 'operator', 'viewer'] },
+        is_active: { type: 'boolean' },
+      }, {
+        paginated: true,
+        example: {
+          page: 1, limit: 20, search: 'budi', role: 'operator', is_active: true,
+        }
+      }),
       responses: {
         200: dataResponse('OK', { type: 'array', items: ref('AdminUser') }, { paginated: true }),
         401: response('Unauthorized'),
         403: response('Forbidden'),
       },
     },
+  },
+  '/admin-users': {
     post: {
       tags,
       summary: 'Tambah admin',

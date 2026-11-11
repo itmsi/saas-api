@@ -2,50 +2,47 @@
  * Swagger API Path Definitions for Clients Module
  */
 const {
-  ref, response, param, dataResponse, jsonBody, errorBody, bearer,
+  ref, response, param, dataResponse, jsonBody, listBody, errorBody, bearer,
 } = require('../helpers')
 
 const tags = ['Clients']
 const idParam = param('IdParam')
 
 const clientPaths = {
-  '/clients': {
-    get: {
+  '/clients/list': {
+    post: {
       tags,
       summary: 'List client',
       description: '**Role:** semua admin. Termasuk ringkasan DB, subscription berjalan, dan plan.',
       security: bearer,
-      parameters: [
-        param('PageParam'),
-        param('LimitParam'),
-        {
-          name: 'status',
-          in: 'query',
-          required: false,
-          description: 'Bisa diulang: ?status=active&status=suspended',
-          schema: { type: 'string', enum: ['provisioning', 'provisioning_failed', 'active', 'suspended', 'deprovisioning', 'deleted'] },
+      requestBody: listBody({
+        status: {
+          oneOf: [
+            { type: 'string', enum: ['provisioning', 'provisioning_failed', 'active', 'suspended', 'deprovisioning', 'deleted'] },
+            { type: 'array', items: { type: 'string', enum: ['provisioning', 'provisioning_failed', 'active', 'suspended', 'deprovisioning', 'deleted'] } },
+          ],
+          description: 'Satu status atau array, mis. ["active", "suspended"]',
         },
-        {
-          name: 'search', in: 'query', required: false, description: 'Cari di client_code / nama / email', schema: { type: 'string' },
+        search: { type: 'string', description: 'Cari di client_code / nama / email' },
+        cluster_id: { type: 'string', format: 'uuid' },
+        plan_code: { type: 'string' },
+        sort: {
+          type: 'string', enum: ['created_at', 'client_code', 'name', 'status'], default: 'created_at',
         },
-        {
-          name: 'cluster_id', in: 'query', required: false, schema: { type: 'string', format: 'uuid' },
-        },
-        {
-          name: 'plan_code', in: 'query', required: false, schema: { type: 'string' },
-        },
-        {
-          name: 'sort', in: 'query', required: false, schema: { type: 'string', enum: ['created_at', 'client_code', 'name', 'status'], default: 'created_at' },
-        },
-        {
-          name: 'order', in: 'query', required: false, schema: { type: 'string', enum: ['asc', 'desc'], default: 'desc' },
-        },
-      ],
+        order: { type: 'string', enum: ['asc', 'desc'], default: 'desc' },
+      }, {
+        paginated: true,
+        example: {
+          page: 1, limit: 20, status: ['active', 'suspended'], search: 'acme', sort: 'created_at', order: 'desc',
+        }
+      }),
       responses: {
         200: dataResponse('OK', { type: 'array', items: ref('ClientListItem') }, { paginated: true }),
         401: response('Unauthorized'),
       },
     },
+  },
+  '/clients': {
     post: {
       tags,
       summary: 'Buat client + config DB + job provisioning',
@@ -224,22 +221,21 @@ const clientPaths = {
     },
   },
   '/clients/{id}/jobs': {
-    get: {
+    post: {
       tags,
       summary: 'Histori job client',
       description: '**Role:** semua admin',
       security: bearer,
-      parameters: [
-        idParam,
-        param('PageParam'),
-        param('LimitParam'),
-        {
-          name: 'type', in: 'query', required: false, schema: { type: 'string', enum: ['provision', 'migrate', 'cleanup', 'deprovision', 'rotate_password', 'reset_system_user'] },
-        },
-        {
-          name: 'status', in: 'query', required: false, schema: { type: 'string', enum: ['queued', 'running', 'success', 'failed', 'rolling_back', 'rolled_back', 'rollback_failed'] },
-        },
-      ],
+      parameters: [idParam],
+      requestBody: listBody({
+        type: { type: 'string', enum: ['provision', 'migrate', 'cleanup', 'deprovision', 'rotate_password', 'reset_system_user'] },
+        status: { type: 'string', enum: ['queued', 'running', 'success', 'failed', 'rolling_back', 'rolled_back', 'rollback_failed'] },
+      }, {
+        paginated: true,
+        example: {
+          page: 1, limit: 20, type: 'provision', status: 'failed'
+        }
+      }),
       responses: {
         200: dataResponse('OK', { type: 'array', items: ref('ProvisioningJob') }, { paginated: true }),
         401: response('Unauthorized'),
@@ -248,12 +244,13 @@ const clientPaths = {
     },
   },
   '/clients/{id}/audit-logs': {
-    get: {
+    post: {
       tags,
       summary: 'Histori aktivitas client',
       description: '**Role:** semua admin. Semua aksi admin & worker terhadap client ini.',
       security: bearer,
-      parameters: [idParam, param('PageParam'), param('LimitParam')],
+      parameters: [idParam],
+      requestBody: listBody({}, { paginated: true }),
       responses: {
         200: dataResponse('OK', { type: 'array', items: ref('AuditLog') }, { paginated: true }),
         401: response('Unauthorized'),

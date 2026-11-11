@@ -2,7 +2,7 @@
  * Swagger API Path Definitions for Migration Rollout Module
  */
 const {
-  ref, response, param, dataResponse, jsonBody, errorBody, bearer,
+  ref, response, param, dataResponse, jsonBody, listBody, errorBody, bearer,
 } = require('../helpers')
 
 const tags = ['Migrations']
@@ -45,18 +45,12 @@ const migrationPaths = {
     },
   },
   '/migrations/rollouts': {
-    get: {
+    post: {
       tags,
       summary: 'List rollout',
       description: '**Role:** semua admin',
       security: bearer,
-      parameters: [
-        param('PageParam'),
-        param('LimitParam'),
-        {
-          name: 'status', in: 'query', required: false, schema: { type: 'string', enum: ['running', 'completed', 'completed_with_errors'] },
-        },
-      ],
+      requestBody: listBody({ status: { type: 'string', enum: ['running', 'completed', 'completed_with_errors'] } }, { paginated: true, example: { page: 1, limit: 20, status: 'running' } }),
       responses: {
         200: dataResponse('OK', { type: 'array', items: ref('Rollout') }, { paginated: true }),
         401: response('Unauthorized'),

@@ -2,26 +2,26 @@
  * Swagger API Path Definitions for Plans Module
  */
 const {
-  ref, response, param, dataResponse, jsonBody, errorBody, bearer,
+  ref, response, param, dataResponse, jsonBody, listBody, errorBody, bearer,
 } = require('../helpers')
 
 const tags = ['Plans']
 
 const planPaths = {
-  '/plans': {
-    get: {
+  '/plans/list': {
+    post: {
       tags,
       summary: 'List plan',
       description: '**Role:** semua admin',
       security: bearer,
-      parameters: [{
-        name: 'is_active', in: 'query', required: false, schema: { type: 'boolean' },
-      }],
+      requestBody: listBody({ is_active: { type: 'boolean' } }, { example: { is_active: true } }),
       responses: {
         200: dataResponse('OK', { type: 'array', items: ref('Plan') }),
         401: response('Unauthorized'),
       },
     },
+  },
+  '/plans': {
     post: {
       tags,
       summary: 'Buat plan',
