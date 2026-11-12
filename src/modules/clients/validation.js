@@ -19,12 +19,12 @@ const profile = {
 const list = Joi.object({
   ...pagination,
   status: Joi.alternatives(
-    Joi.string().valid(...CLIENT_STATUSES),
+    Joi.string().valid(...CLIENT_STATUSES).empty(''),
     Joi.array().items(Joi.string().valid(...CLIENT_STATUSES)),
   ),
   search: Joi.string().max(100).allow(''),
-  cluster_id: uuid,
-  plan_code: Joi.string().max(50),
+  cluster_id: uuid.empty(''),
+  plan_code: Joi.string().max(50).empty(''),
   sort: Joi.string().valid('created_at', 'client_code', 'name', 'status').default('created_at'),
   order: Joi.string().valid('asc', 'desc').default('desc'),
 })
@@ -64,8 +64,8 @@ const deprovision = Joi.object({
 
 const jobs = Joi.object({
   ...pagination,
-  type: Joi.string().valid(...JOB_TYPES),
-  status: Joi.string().valid(...JOB_STATUSES),
+  type: Joi.string().valid(...JOB_TYPES).empty(''),
+  status: Joi.string().valid(...JOB_STATUSES).empty(''),
 })
 
 const auditLogs = Joi.object({ ...pagination })

@@ -17,7 +17,7 @@ const fields = {
   is_default: Joi.boolean(),
 }
 
-const list = Joi.object({ status: Joi.string().valid(...STATUSES) })
+const list = Joi.object({ status: Joi.string().valid(...STATUSES).empty('') })
 
 const create = Joi.object({
   ...fields,

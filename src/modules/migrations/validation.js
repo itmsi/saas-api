@@ -9,7 +9,7 @@ const rollout = Joi.object({
 
 const list = Joi.object({
   ...pagination,
-  status: Joi.string().valid('running', 'completed', 'completed_with_errors'),
+  status: Joi.string().valid('running', 'completed', 'completed_with_errors').empty(''),
 })
 
 module.exports = { idParam, rollout, list }

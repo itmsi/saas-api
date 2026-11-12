@@ -6,8 +6,8 @@ const email = Joi.string().email({ tlds: { allow: false } }).max(150)
 const list = Joi.object({
   ...pagination,
   search: Joi.string().max(100).allow(''),
-  role: Joi.string().valid(...ROLES),
-  is_active: Joi.boolean(),
+  role: Joi.string().valid(...ROLES).empty(''),
+  is_active: Joi.boolean().empty(''),
 })
 
 const create = Joi.object({
