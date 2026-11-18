@@ -48,6 +48,8 @@ const jsonBody = (schemaName, example, { required = true, examples } = {}) => ({
  */
 const listBody = (properties = {}, { paginated = false, example } = {}) => ({
   required: false,
+  description: 'Semua field opsional. Field berisi `""`, `null`, `NaN`, `"nan"`, `"null"`, atau `"undefined"` dianggap tidak diisi '
+    + '(tidak kena validasi, nilai default berlaku). Elemen kosong di array juga diabaikan.',
   content: {
     'application/json': {
       schema: {

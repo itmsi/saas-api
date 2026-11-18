@@ -1,5 +1,5 @@
 const {
-  Joi, uuid, idParam, pagination, sortBy,
+  Joi, uuid, idParam, pagination, sortBy, listSchema,
 } = require('../../utils/validation')
 
 const rollout = Joi.object({
@@ -7,7 +7,7 @@ const rollout = Joi.object({
   target: Joi.string().max(100).default('latest'),
 })
 
-const list = Joi.object({
+const list = listSchema({
   ...pagination,
   ...sortBy,
   status: Joi.string().valid('running', 'completed', 'completed_with_errors').empty(''),

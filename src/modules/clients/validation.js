@@ -1,5 +1,5 @@
 const {
-  Joi, uuid, idParam, pagination, sortBy,
+  Joi, uuid, idParam, pagination, sortBy, listSchema,
 } = require('../../utils/validation')
 const { JOB_TYPES } = require('../../lib/job-plans')
 
@@ -16,7 +16,7 @@ const profile = {
   settings: Joi.object().unknown(true),
 }
 
-const list = Joi.object({
+const list = listSchema({
   ...pagination,
   status: Joi.alternatives(
     Joi.string().valid(...CLIENT_STATUSES).empty(''),
@@ -62,14 +62,14 @@ const deprovision = Joi.object({
   backup: Joi.boolean().default(true),
 })
 
-const jobs = Joi.object({
+const jobs = listSchema({
   ...pagination,
   ...sortBy,
   type: Joi.string().valid(...JOB_TYPES).empty(''),
   status: Joi.string().valid(...JOB_STATUSES).empty(''),
 })
 
-const auditLogs = Joi.object({ ...pagination, ...sortBy })
+const auditLogs = listSchema({ ...pagination, ...sortBy })
 
 module.exports = {
   idParam, list, create, update, updateStatus, deprovision, jobs, auditLogs,

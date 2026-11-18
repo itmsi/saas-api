@@ -1,11 +1,11 @@
 const {
-  Joi, uuid, idParam, pagination, sortBy,
+  Joi, uuid, idParam, pagination, sortBy, listSchema,
 } = require('../../utils/validation')
 const { JOB_TYPES } = require('../../lib/job-plans')
 
 const JOB_STATUSES = ['queued', 'running', 'success', 'failed', 'rolling_back', 'rolled_back', 'rollback_failed']
 
-const list = Joi.object({
+const list = listSchema({
   ...pagination,
   ...sortBy,
   status: Joi.string().valid(...JOB_STATUSES).empty(''),

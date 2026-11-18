@@ -1,11 +1,11 @@
 const {
-  Joi, idParam, pagination, sortBy,
+  Joi, idParam, pagination, sortBy, listSchema,
 } = require('../../utils/validation')
 
 const ROLES = ['superadmin', 'operator', 'viewer']
 const email = Joi.string().email({ tlds: { allow: false } }).max(150)
 
-const list = Joi.object({
+const list = listSchema({
   ...pagination,
   ...sortBy,
   search: Joi.string().max(100).allow(''),

@@ -1,4 +1,6 @@
-const { Joi, idParam, sortBy } = require('../../utils/validation')
+const {
+  Joi, idParam, sortBy, listSchema
+} = require('../../utils/validation')
 
 const STATUSES = ['trial', 'active', 'past_due', 'expired', 'cancelled']
 
@@ -21,7 +23,7 @@ const update = Joi.object({
   notes: Joi.string().max(2000).allow(null, ''),
 }).min(1)
 
-const list = Joi.object({ ...sortBy })
+const list = listSchema({ ...sortBy })
 
 module.exports = {
   idParam, list, create, update,
