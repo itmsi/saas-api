@@ -1,4 +1,4 @@
-const { Joi, idParam } = require('../../utils/validation')
+const { Joi, idParam, sortBy } = require('../../utils/validation')
 
 const fields = {
   name: Joi.string().max(100),
@@ -11,7 +11,7 @@ const fields = {
   is_default: Joi.boolean(),
 }
 
-const list = Joi.object({ is_active: Joi.boolean() })
+const list = Joi.object({ ...sortBy, is_active: Joi.boolean() })
 
 const create = Joi.object({
   code: Joi.string().pattern(/^[a-z0-9_-]{2,50}$/).required(),

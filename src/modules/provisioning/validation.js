@@ -1,5 +1,5 @@
 const {
-  Joi, uuid, idParam, pagination,
+  Joi, uuid, idParam, pagination, sortBy,
 } = require('../../utils/validation')
 const { JOB_TYPES } = require('../../lib/job-plans')
 
@@ -7,6 +7,7 @@ const JOB_STATUSES = ['queued', 'running', 'success', 'failed', 'rolling_back', 
 
 const list = Joi.object({
   ...pagination,
+  ...sortBy,
   status: Joi.string().valid(...JOB_STATUSES).empty(''),
   type: Joi.string().valid(...JOB_TYPES).empty(''),
   client_id: uuid.empty(''),

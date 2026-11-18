@@ -27,13 +27,12 @@ const clientPaths = {
         cluster_id: { type: 'string', format: 'uuid' },
         plan_code: { type: 'string' },
         sort: {
-          type: 'string', enum: ['created_at', 'client_code', 'name', 'status'], default: 'created_at',
+          type: 'string', enum: ['created_at', 'client_code', 'name', 'status'], default: 'created_at', description: 'Kolom urutan (arah ditentukan sort_by)',
         },
-        order: { type: 'string', enum: ['asc', 'desc'], default: 'desc' },
       }, {
         paginated: true,
         example: {
-          page: 1, limit: 20, status: ['active', 'suspended'], search: 'acme', sort: 'created_at', order: 'desc',
+          page: 1, limit: 20, status: ['active', 'suspended'], search: 'acme', sort: 'created_at', sort_by: 'DESC',
         }
       }),
       responses: {

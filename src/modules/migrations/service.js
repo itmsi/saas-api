@@ -120,7 +120,7 @@ const listRollouts = async (query) => {
   const base = alive(db('migration_rollouts'))
   if (query.status) base.where({ status: query.status })
   const [{ count }] = await base.clone().count({ count: '*' })
-  const rows = await base.orderBy('created_at', 'desc').limit(p.limit).offset(p.offset)
+  const rows = await base.orderBy('created_at', query.sort_by || 'DESC').limit(p.limit).offset(p.offset)
   return { rows: rows.map(publicRow), meta: pageMeta(p, Number(count)) }
 }
 

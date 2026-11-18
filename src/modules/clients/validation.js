@@ -1,5 +1,5 @@
 const {
-  Joi, uuid, idParam, pagination,
+  Joi, uuid, idParam, pagination, sortBy,
 } = require('../../utils/validation')
 const { JOB_TYPES } = require('../../lib/job-plans')
 
@@ -26,7 +26,7 @@ const list = Joi.object({
   cluster_id: uuid.empty(''),
   plan_code: Joi.string().max(50).empty(''),
   sort: Joi.string().valid('created_at', 'client_code', 'name', 'status').default('created_at'),
-  order: Joi.string().valid('asc', 'desc').default('desc'),
+  ...sortBy,
 })
 
 const create = Joi.object({
@@ -64,11 +64,12 @@ const deprovision = Joi.object({
 
 const jobs = Joi.object({
   ...pagination,
+  ...sortBy,
   type: Joi.string().valid(...JOB_TYPES).empty(''),
   status: Joi.string().valid(...JOB_STATUSES).empty(''),
 })
 
-const auditLogs = Joi.object({ ...pagination })
+const auditLogs = Joi.object({ ...pagination, ...sortBy })
 
 module.exports = {
   idParam, list, create, update, updateStatus, deprovision, jobs, auditLogs,

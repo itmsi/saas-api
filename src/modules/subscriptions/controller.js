@@ -2,7 +2,7 @@ const { ok, created, wrapAll } = require('../../utils/response')
 const { ctxOf } = require('../../utils/context')
 const service = require('./service')
 
-const listByClient = async (req, res) => ok(res, await service.listByClient(req.valid.params.id))
+const listByClient = async (req, res) => ok(res, await service.listByClient(req.valid.params.id, req.valid.query))
 
 const create = async (req, res) => {
   const { row, cancelledIds } = await service.create(req.valid.params.id, req.body, ctxOf(req))

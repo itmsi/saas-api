@@ -34,7 +34,7 @@ const list = async (query) => {
   if (query.is_active !== undefined) base.where({ is_active: query.is_active })
 
   const [{ count }] = await base.clone().count({ count: '*' })
-  const rows = await base.select(COLUMNS).orderBy('created_at', 'desc').limit(p.limit).offset(p.offset)
+  const rows = await base.select(COLUMNS).orderBy('created_at', query.sort_by || 'DESC').limit(p.limit).offset(p.offset)
   return { rows, meta: pageMeta(p, Number(count)) }
 }
 

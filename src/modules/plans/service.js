@@ -26,8 +26,8 @@ const clearDefault = (trx, body, exceptId) => (body.is_default
 
 const toRow = (body) => (body.features ? { ...body, features: JSON.stringify(body.features) } : { ...body })
 
-const list = async ({ is_active: isActive }) => {
-  const q = alive(db('plans')).orderBy('price_monthly').orderBy('code')
+const list = async ({ is_active: isActive, sort_by: sortDir = 'DESC' }) => {
+  const q = alive(db('plans')).orderBy('created_at', sortDir).orderBy('code')
   if (isActive !== undefined) q.where({ is_active: isActive })
   return (await q).map(publicRow)
 }

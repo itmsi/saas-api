@@ -1,4 +1,4 @@
-const { Joi, idParam } = require('../../utils/validation')
+const { Joi, idParam, sortBy } = require('../../utils/validation')
 
 const STATUSES = ['active', 'full', 'maintenance', 'disabled']
 
@@ -17,7 +17,10 @@ const fields = {
   is_default: Joi.boolean(),
 }
 
-const list = Joi.object({ status: Joi.string().valid(...STATUSES).empty('') })
+const list = Joi.object({
+  ...sortBy,
+  status: Joi.string().valid(...STATUSES).empty(''),
+})
 
 const create = Joi.object({
   ...fields,

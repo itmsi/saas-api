@@ -42,6 +42,7 @@ const jsonBody = (schemaName, example, { required = true, examples } = {}) => ({
 
 /**
  * Request body filter untuk endpoint list (POST). Field sama dengan query lama.
+ * Selalu menyertakan sort_by (DESC | ASC, default DESC).
  * @param {object} properties  properti filter, mis. { status: { type: 'string' } }
  * @param {{ paginated?: boolean, example?: object }} [opts]
  */
@@ -60,10 +61,13 @@ const listBody = (properties = {}, { paginated = false, example } = {}) => ({
               type: 'integer', minimum: 1, maximum: 100, default: 20, description: 'Jumlah data per halaman (maks 100)',
             },
           } : {}),
+          sort_by: {
+            type: 'string', enum: ['DESC', 'ASC'], default: 'DESC', description: 'Arah urutan: DESC (descending, default) atau ASC (ascending)',
+          },
           ...properties,
         },
       },
-      example: example || (paginated ? { page: 1, limit: 20 } : {}),
+      example: { sort_by: 'DESC', ...(example || (paginated ? { page: 1, limit: 20 } : {})) },
     },
   },
 })

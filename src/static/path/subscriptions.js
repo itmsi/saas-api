@@ -12,9 +12,18 @@ const subscriptionPaths = {
     get: {
       tags,
       summary: 'Histori subscription client',
-      description: '**Role:** semua admin. Urut start_date terbaru.',
+      description: '**Role:** semua admin. Urut start_date (arah sesuai sort_by, default DESC = terbaru).',
       security: bearer,
-      parameters: [param('IdParam')],
+      parameters: [
+        param('IdParam'),
+        {
+          name: 'sort_by',
+          in: 'query',
+          required: false,
+          description: 'Arah urutan: DESC (descending, default) atau ASC (ascending)',
+          schema: { type: 'string', enum: ['DESC', 'ASC'], default: 'DESC' },
+        },
+      ],
       responses: {
         200: dataResponse('OK', { type: 'array', items: ref('Subscription') }),
         401: response('Unauthorized'),

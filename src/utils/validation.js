@@ -8,7 +8,12 @@ const pagination = {
   limit: Joi.number().integer().min(1).max(100)
     .default(20),
 }
+/** Arah urutan list: ASC / DESC (case-insensitive), default DESC */
+const sortBy = {
+  sort_by: Joi.string().trim().uppercase().valid('ASC', 'DESC')
+    .default('DESC'),
+}
 
 module.exports = {
-  Joi, uuid, idParam, pagination
+  Joi, uuid, idParam, pagination, sortBy,
 }

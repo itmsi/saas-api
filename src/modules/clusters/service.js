@@ -27,8 +27,8 @@ const clearDefault = (trx, body, exceptId) => (body.is_default
   ? alive(trx('db_clusters')).where({ is_default: true }).whereNot({ id: exceptId || null }).update({ is_default: false })
   : null)
 
-const list = async ({ status }) => {
-  const q = alive(db('db_clusters')).orderBy('name')
+const list = async ({ status, sort_by: sortDir = 'DESC' }) => {
+  const q = alive(db('db_clusters')).orderBy('created_at', sortDir).orderBy('name')
   if (status) q.where({ status })
   return (await q).map(withCapacity)
 }

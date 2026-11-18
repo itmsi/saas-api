@@ -1,5 +1,5 @@
 const {
-  Joi, uuid, idParam, pagination,
+  Joi, uuid, idParam, pagination, sortBy,
 } = require('../../utils/validation')
 
 const rollout = Joi.object({
@@ -9,6 +9,7 @@ const rollout = Joi.object({
 
 const list = Joi.object({
   ...pagination,
+  ...sortBy,
   status: Joi.string().valid('running', 'completed', 'completed_with_errors').empty(''),
 })
 

@@ -18,7 +18,7 @@ const clientRouter = express.Router({ mergeParams: true })
  * @desc    Histori subscription client
  * @access  Admin
  */
-clientRouter.get('/', validate({ params: schema.idParam }), controller.listByClient)
+clientRouter.get('/', validate({ params: schema.idParam, query: schema.list }), controller.listByClient)
 
 /**
  * @route   POST /api/v1/clients/:id/subscriptions

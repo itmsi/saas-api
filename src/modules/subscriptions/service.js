@@ -15,14 +15,14 @@ const getClient = async (id, trx = db) => {
 const invalidate = (client, reason) => cache.invalidateTenant({ client_id: client.id, client_code: client.client_code }, reason)
 
 /** Histori subscription client */
-const listByClient = async (clientId) => {
+const listByClient = async (clientId, { sort_by: sortDir = 'DESC' } = {}) => {
   await getClient(clientId)
   const rows = await alive(db('subscriptions as s'), 's')
     .join('plans as p', 'p.id', 's.plan_id')
     .where('s.client_id', clientId)
     .select('s.*', 'p.code as plan_code', 'p.name as plan_name')
-    .orderBy('s.start_date', 'desc')
-    .orderBy('s.created_at', 'desc')
+    .orderBy('s.start_date', sortDir)
+    .orderBy('s.created_at', sortDir)
   return rows.map(publicRow)
 }
 

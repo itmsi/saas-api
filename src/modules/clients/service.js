@@ -106,7 +106,7 @@ const list = async (query) => {
       's.end_date as subscription_end_date',
       'p.code as plan_code',
     )
-    .orderBy(`c.${query.sort || 'created_at'}`, query.order || 'desc')
+    .orderBy(`c.${query.sort || 'created_at'}`, query.sort_by || 'DESC')
     .limit(p.limit)
     .offset(p.offset)
   return { rows, meta: pageMeta(p, Number(count)) }
@@ -326,7 +326,7 @@ const jobs = async (id, query) => {
   if (query.type) base.where({ type: query.type })
   if (query.status) base.where({ status: query.status })
   const [{ count }] = await base.clone().count({ count: '*' })
-  const rows = await base.orderBy('queued_at', 'desc').limit(p.limit).offset(p.offset)
+  const rows = await base.orderBy('queued_at', query.sort_by || 'DESC').limit(p.limit).offset(p.offset)
   return { rows: rows.map(publicRow), meta: pageMeta(p, Number(count)) }
 }
 
@@ -335,7 +335,7 @@ const auditLogs = async (id, query) => {
   const p = pageOf(query)
   const base = alive(db('audit_logs')).where({ target_type: 'client', target_id: id })
   const [{ count }] = await base.clone().count({ count: '*' })
-  const rows = await base.orderBy('id', 'desc').limit(p.limit).offset(p.offset)
+  const rows = await base.orderBy('id', query.sort_by || 'DESC').limit(p.limit).offset(p.offset)
   return { rows: rows.map(publicRow), meta: pageMeta(p, Number(count)) }
 }
 

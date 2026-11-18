@@ -34,7 +34,7 @@ const list = async (query) => {
   const [{ count }] = await base.clone().count({ count: '*' })
   const rows = await base
     .select('j.*', 'c.client_code', 'c.name as client_name')
-    .orderBy('j.queued_at', 'desc')
+    .orderBy('j.queued_at', query.sort_by || 'DESC')
     .limit(p.limit)
     .offset(p.offset)
   return { rows: rows.map(publicRow), meta: pageMeta(p, Number(count)) }
